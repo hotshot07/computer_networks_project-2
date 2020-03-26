@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from opencage.geocoder import OpenCageGeocode
+
 import time
 import random
 
@@ -10,7 +10,7 @@ import random
 #------------Used API to get longitude and latitute----
 # Exported the data so I dont have to use the API again and again
 
-
+# from opencage.geocoder import OpenCageGeocode
 # key = 'Insert_API_Key'
 # geocoder = OpenCageGeocode(key)
 
@@ -45,7 +45,9 @@ import random
 
 #-------------------------Generating the heatmap -------------------------------------
 
+# Using the modified data now, generated from the section above
 modData = pd.read_csv('ModifiedData.csv')
+
 # renaing the population
 modData = modData.rename(columns={"4761865": "Population"})
 
@@ -94,5 +96,6 @@ clientDict = {
 
 clientData = pd.DataFrame(clientDict)
 
-clientData.plot(kind='scatter', x='Longitude', y='Latitude', alpha=0.5, c='Affected', cmap=plt.get_cmap("jet"), colorbar=True)
+clientData.plot(kind='scatter', x='Longitude', y='Latitude',
+                alpha=0.5, c='Affected', cmap=plt.get_cmap("jet"), colorbar=True)
 plt.show()
