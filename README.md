@@ -1,13 +1,13 @@
-# project2
+# Project2
 
 ## Heatmap
-I'm made a heatmap of what our service would look like if like 2500 people use it\
+I'm made a heatmap of what our service would look like if like 2500 people use it
 
 We've used python3 for this project\
 To run the script, install these dependencies\
 pip3 install numpy \
 pip3 install pandas \
-pip3 install matplotlib \
+pip3 install matplotlib
 
 To run it \
 python3 heatmap.py
