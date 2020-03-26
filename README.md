@@ -14,13 +14,16 @@ python3 heatmap.py
 
 ![heatmap](heatmap/heatmapimg.png)
 
-
-server.py and client.py:\
-python3 client.py (open as many terminal windows as clients you desire)\
-python3 sever.py (1 window on the terminal)
+## Client-server
 
 At the moment very basic functionality:\
     Clients connect to server and are asked about whether or not they want to take a COVID-19 test.\
     If server exits, clients do as well.
+    
+To run files:\
+python3 client.py (open as many terminal windows as clients you desire)\
+python3 sever.py (1 window on the terminal)
+
+
 
 
