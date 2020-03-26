@@ -7,22 +7,28 @@ import time
 #in case server stops:
 import sys
 
+serverName = ''
 serverPort = 2112
 
-serverSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# allows sockets to reuse addresses so that new ones don't need to be
+serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # bind() assigns the port number serverPort to the server’s socket.
-serverSocket.bind(('', serverPort))
+serverSocket.bind((serverName, serverPort))
 print ('\n** SERVER **')
+
+# server listening to new connections
+serverSocket.listen()
 
 #list of clients ip addresses
 clients=[]
 
 #each thread is a client that connected to the server
-def clientthread(clientAddress):
+def clientthread(conn):
     #send welcome to client
-    serverSocket.sendto(('Welcome').encode(), clientAddress)
-    serverSocket.sendto(('Would you like to take a test? (Y/N)').encode(), clientAddress)
-    answer, clientAddress = serverSocket.recvfrom(2048)
+    conn.send(('Welcome').encode())
+    conn.send(('Would you like to take a test? (Y/N)').encode())
+    answer = conn.recv(2048)
 
     if (str(answer)[2:-1]=="N"):
         print("N")
@@ -39,31 +45,33 @@ while True:
     
         #if server stops -> all clients stop
     try:
+
+        conn, addr = serverSocket.accept()
             #with this message we also get client's address (useful)
-        hello, clientAddress = serverSocket.recvfrom(2048)
+        hello = conn.recv(2048)
 
             #if client wants to exit
-        if hello== ('Client ' + str(clientAddress[1]) + ' exiting').encode():
+        if hello== ('Client exiting').encode():
             #print('\n** Client ' + str(clientAddress[1]) + ' exited **')
 
                 #remove client from clients list
-            clients.remove(clientAddress)
+            clients.remove(conn)
         
         else:
                 #when receiving smth from client, if client is already a client, don't call thread again
-            if clientAddress not in clients:
+            if conn not in clients:
                 print('\n' + str(hello)[2:-1])
                 
                     #add client to list of clients
-                clients.append(clientAddress)
+                clients.append(conn)
 
-                start_new_thread(clientthread, (clientAddress, ))
+                start_new_thread(clientthread, (conn, ))
          
     
     except KeyboardInterrupt:
             #send message to all clients warning that server stopped
-        for x in range(0,len(clients)):
-            serverSocket.sendto(('Server exiting').encode(), clients[x])
-        print('*** Server closed ***')
+        for i in clients:
+            i.send(('Server exiting').encode())
+        #print('** Server closed **')
         serverSocket.close()
         sys.exit()

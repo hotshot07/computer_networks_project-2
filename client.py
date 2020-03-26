@@ -12,21 +12,26 @@ serverPort = 2112
 #CREATING CLIENT'S SOCKET
     #AF_INET indicates that the underlying network is using IPv4
     #SOCK_DGRAM indicates this is a UDP socket
-clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)     
-print ('\n** CLIENT **\n')
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)     
+print ('\n** CLIENT **')
+
+remote_ip = socket.gethostbyname( serverName )
 
 try:
-    #initial msg client sends to server so server can know address of client
-    clientSocket.sendto(('Hello, I\'m a client').encode(),(serverName, serverPort))            
-    
-    #if error in server's address:
-except socket.gaierror as msg:
-    print ('Error code: ' + str(msg))
+    #Connect to remote server
+    clientSocket.connect((remote_ip , serverPort))
+    #if server not connected
+except socket.error as msg:
+    print ('Server not connected\nError code: ' + str(msg) + "!")
     clientSocket.close()
     sys.exit()
+
+#initial msg client sends to server so server can know address of client
+clientSocket.send(('Hello, I\'m a client').encode())            
+
     
 #client gets welcome message of server (proof that server is working)
-welcome, serverAddress = clientSocket.recvfrom(2048)
+welcome = clientSocket.recv(2048)
 print (str(welcome)[2:-1])
     
 #client will do these actions repeteadly
@@ -34,17 +39,18 @@ while True:
 
     try:
             #client receives messages from server
-        msg, serverAddress = clientSocket.recvfrom(2048)
+        msg = clientSocket.recv(2048)
         
             #in case server closes communication
         if msg == ('Server exiting').encode():
             #closes socket and process terminates
+            print('Server disconnected')
             clientSocket.close()
             sys.exit()
         
         if msg == ('Would you like to take a test? (Y/N)').encode():
             answer = input('Would you like to take a test? (Y/N): ')
-            clientSocket.sendto(answer.encode(),(serverName, serverPort))
+            clientSocket.send(answer.encode())
        
         else:
             print(str(msg)[2:-1])
@@ -52,7 +58,7 @@ while True:
 
     except KeyboardInterrupt:
         #if client exits (ctr+c) -> tell server
-        clientSocket.sendto(('Client ' + str(clientSocket.getsockname())[12:17] + ' exiting').encode(),(serverName, serverPort))
+        clientSocket.send(('Client exiting').encode())
         #closes socket and process terminates
         clientSocket.close()
         sys.exit()
