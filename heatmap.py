@@ -49,7 +49,7 @@ modData = pd.read_csv('ModifiedData.csv')
 # renaing the population
 modData = modData.rename(columns={"4761865": "Population"})
 
-NumberOfClients = 5000
+NumberOfClients = 2500
 
 clients = []
 county = []
@@ -57,7 +57,7 @@ latituteCl = []
 longitudeCl = []
 affected = []
 
-sigma = 0.1
+sigma = 0.14
 
 
 def makeDataForState(numberOfPeople):
