@@ -4,8 +4,6 @@ import socket
 # Importing thread to make it a multithreaded application
 from threading import Thread
 
-import multiprocessing
-
 # For handling the CTRL-C input
 import sys
 
@@ -53,7 +51,7 @@ signal.signal(signal.SIGINT, sigint_handler)
 
 
 #----- FORMAT -----
-# 6.........Mayank
+# 4.........Name
 def getNewUser(client_socket):
     try:
         # Receiving our "header" containing message length
@@ -104,8 +102,6 @@ def checkForVirus(answerlist):
                0.14, 0.14, 0.11, 0.05, 0.05, 0.04, -1, 0.3, 0.5, 0.3]
     answerlist = answerlist[1:]
     virusSum = 0
-    print("Here")
-    print(len(answerlist))
     for i in range(len(answerlist)):
         if answerlist[i] == 'Y\n':
             virusSum = virusSum + weights[i]
@@ -142,7 +138,10 @@ def clientThread(client_socket, client_address):
             message = client_socket.recv(2048)
             message = message.decode('utf-8')
             if message:
-                if question > 15:
+
+                answerlist.append(message)
+                print(answerlist)
+                if question > 16:
                     client_socket.send("End of Survey\n".encode('utf-8'))
                     client_socket.send(
                         "We are now checking if you need to be tested\n".encode('utf-8'))
@@ -151,14 +150,13 @@ def clientThread(client_socket, client_address):
 
                     if confirmation == "positive":
                         client_socket.send(
-                            "Yeah mate you're fucked".encode('utf-8'))
-                        client_socket.close()
-                    elif confirmation == "negative":
-                        client_socket.send("You're fine".encode('utf-8'))
+                            "You will need a test\n".encode('utf-8'))
                         client_socket.close()
 
-                answerlist.append(message)
-                print(answerlist)
+                    elif confirmation == "negative":
+                        client_socket.send("You're fine\n".encode('utf-8'))
+                        client_socket.close()
+
                 sendSurvey(client_socket, question)
                 question = question + 1
 
