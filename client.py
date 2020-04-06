@@ -75,8 +75,8 @@ while True:
             message = sys.stdin.readline()
             message = message.encode('utf-8')
             client_socket.send(message)
-            sys.stdout.write(str(my_username) + " > ")
-            sys.stdout.write(message.decode('utf-8'))
+            #sys.stdout.write(str(my_username) + " > ")
+            #sys.stdout.write(message.decode('utf-8'))
             sys.stdout.flush()
 
 

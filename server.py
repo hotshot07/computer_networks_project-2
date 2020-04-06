@@ -48,10 +48,10 @@ def sigint_handler(signum, frame):
 signal.signal(signal.SIGINT, sigint_handler)
 
 # Function to get username of the new user that connects to the server
-
-
 #----- FORMAT -----
 # 4.........Name
+
+
 def getNewUser(client_socket):
     try:
         # Receiving our "header" containing message length
@@ -102,11 +102,12 @@ def checkForVirus(answerlist):
                0.14, 0.14, 0.11, 0.05, 0.05, 0.04, -1, 0.3, 0.5, 0.3]
     answerlist = answerlist[1:]
     virusSum = 0
+    affirmitiveAnswers = ['y\n', 'yes\n', 'Y\n',
+                          'Yes\n']
     for i in range(len(answerlist)):
-        if answerlist[i] == 'Y\n':
+        if answerlist[i] in affirmitiveAnswers:
             virusSum = virusSum + weights[i]
-            print(virusSum)
-            print("\n")
+            #print(virusSum)
 
     if virusSum >= 1.58:
         return "positive"
@@ -121,7 +122,7 @@ def greetUser(client_socket, username):
     client_socket.send(
         f"We have collected your location data anonymously\n".encode('utf-8'))
     client_socket.send(
-        f"Press Y to begin the survey or N to exit".encode('utf-8'))
+        f"Press Y to begin the survey or N to exit\n".encode('utf-8'))
 
 
 possibleAnswers = ['y\n', 'yes\n', 'Y\n',
@@ -153,7 +154,7 @@ def clientThread(client_socket, client_address):
             message = message.decode('utf-8')
             if message in possibleAnswers:
                 answerlist.append(message)
-                print(answerlist)
+                #print(answerlist)
                 if question > 16:
                     client_socket.send("End of Survey\n".encode('utf-8'))
                     client_socket.send(
@@ -172,10 +173,6 @@ def clientThread(client_socket, client_address):
 
                 sendSurvey(client_socket, question)
                 question = question + 1
-
-            if message not in possibleAnswers:
-                client_socket.send("Please send a Y/N reply only")
-
         except:
             continue
 
