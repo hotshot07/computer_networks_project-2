@@ -16,13 +16,16 @@ python3 heatmap.py
 
 ## Client-server
 
-At the moment very basic functionality:\
-    Clients connect to server and are asked about whether or not they want to take a COVID-19 test.\
-    If server exits, clients do as well.
+Functionality:\
+    Clients connect to server and are asked to introduce a username.\
+    They take a Covid19 survey and answer multiple questions.\
+    Depending on the answers, the client is recommeded to take a test or it's informed that he/she is fine.\
+    If server stops running, clients stop as well.
     
 To run files:\
+python3 server.py (1 window on the terminal)\
 python3 client.py (open as many terminal windows as clients you desire)\
-python3 sever.py (1 window on the terminal)
+Important to start server process before any client.
 
 
 
