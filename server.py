@@ -114,7 +114,22 @@ def checkForVirus(answerlist):
         return "negative"
 
 
+def greetUser(client_socket, username):
+    # Greeting our beloved client
+    client_socket.send(
+        f"Welcome to this helpline {username}!\n".encode('utf-8'))
+    client_socket.send(
+        f"We have collected your location data anonymously\n".encode('utf-8'))
+    client_socket.send(
+        f"Press Y to begin the survey or N to exit".encode('utf-8'))
+
+
+possibleAnswers = ['y\n', 'yes\n', 'Y\n',
+                   'Yes\n', 'n\n', 'no\n', 'N\n', 'No\n']
+
 # A thread that is made when a new user connects
+
+
 def clientThread(client_socket, client_address):
 
     new_user = getNewUser(client_socket)
@@ -125,11 +140,10 @@ def clientThread(client_socket, client_address):
 
     print(f"{username} has connected to the server")
 
-    # Greeting our beloved client
-    client_socket.send(
-        f"Welcome to this helpline {username}! Type Y to being this survey".encode('utf-8'))
+    greetUser(client_socket, username)
 
     question = 0
+
     answerlist = []
 
     # Now check if we got a message
@@ -137,8 +151,7 @@ def clientThread(client_socket, client_address):
         try:
             message = client_socket.recv(2048)
             message = message.decode('utf-8')
-            if message:
-
+            if message in possibleAnswers:
                 answerlist.append(message)
                 print(answerlist)
                 if question > 16:
@@ -159,6 +172,9 @@ def clientThread(client_socket, client_address):
 
                 sendSurvey(client_socket, question)
                 question = question + 1
+
+            if message not in possibleAnswers:
+                client_socket.send("Please send a Y/N reply only")
 
         except:
             continue
