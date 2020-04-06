@@ -107,7 +107,7 @@ def checkForVirus(answerlist):
     for i in range(len(answerlist)):
         if answerlist[i] in affirmitiveAnswers:
             virusSum = virusSum + weights[i]
-            #print(virusSum)
+            # print(virusSum)
 
     if virusSum >= 1.58:
         return "positive"
@@ -131,6 +131,63 @@ possibleAnswers = ['y\n', 'yes\n', 'Y\n',
 # A thread that is made when a new user connects
 
 
+clientToDoctor = []
+
+
+def sendMessageToDoctor(client_socket, messageDoctor):
+    message = messageDoctor.encode('utf-8')
+    for client in clientToDoctor:
+        if client != client_socket:
+            try:
+                client.send(message)
+            except:
+                print(f"{clients[client]} has left the application")
+
+
+def connectToDoctor(client_socket):
+    client_socket.send("You are now connected to a doctor".encode('utf-8'))
+    for k, v in clients.items():
+        if v == "Doctor":
+            clientToDoctor.append(k)
+
+    clientToDoctor.append(client_socket)
+    while True:
+        try:
+            messageDoctor = client_socket.recv(2048)
+            messageDoctor = messageDoctor.decode('utf-8')
+            if messageDoctor:
+                if messageDoctor == 'close':
+                    return
+                    break
+                else:
+
+                    sendMessageToDoctor(client_socket, messageDoctor)
+        except:
+            continue
+
+
+def sendToClient(message_to_send, client_socket):
+    for client in clientToDoctor:
+        # Don't send it to from where we receive the message
+        if client != client_socket:
+            try:
+                client.send(message_to_send)
+            except:
+                print(f"{clients[client]} has left the application")
+
+
+def doctorThread(client_socket):
+    while True:
+        try:
+            message = client_socket.recv(2048)
+            message = message.decode('utf-8')
+            if message:
+                message_to_send = ("Doctor" + " > " + message).encode('utf-8')
+                sendToClient(message_to_send, client_socket)
+        except:
+            continue
+
+
 def clientThread(client_socket, client_address):
 
     new_user = getNewUser(client_socket)
@@ -140,6 +197,9 @@ def clientThread(client_socket, client_address):
     clients[client_socket] = username
 
     print(f"{username} has connected to the server")
+
+    if username == "Doctor":
+        doctorThread(client_socket)
 
     greetUser(client_socket, username)
 
@@ -154,7 +214,7 @@ def clientThread(client_socket, client_address):
             message = message.decode('utf-8')
             if message in possibleAnswers:
                 answerlist.append(message)
-                #print(answerlist)
+                # print(answerlist)
                 if question > 16:
                     client_socket.send("End of Survey\n".encode('utf-8'))
                     client_socket.send(
@@ -165,6 +225,7 @@ def clientThread(client_socket, client_address):
                     if confirmation == "positive":
                         client_socket.send(
                             "You will need a test\n".encode('utf-8'))
+                        connectToDoctor(client_socket)
                         client_socket.close()
 
                     elif confirmation == "negative":
