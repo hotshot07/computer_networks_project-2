@@ -54,14 +54,13 @@ sendUsernameToServer(my_username)
 # polling between user input and message received from the server
 sockets_list = [sys.stdin, client_socket]
 
-
 while True:
     # checking for I/O in read_sockets
     read_sockets, write_socket, error_socket = select.select(
         sockets_list, [], [])
 
     for socket in read_sockets:
-        # If socket == client_socket, we got a message!
+        # If socket == client_socket, we got a message
         if socket == client_socket:
             message = socket.recv(2048)
             if not len(message):
