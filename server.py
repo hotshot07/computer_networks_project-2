@@ -122,7 +122,7 @@ def greetUser(client_socket, username):
     client_socket.send(
         f"We have collected your location data anonymously\n".encode('utf-8'))
     client_socket.send(
-        f"Press Y to begin the survey or N to exit\n".encode('utf-8'))
+        f"Press Y to begin the survey\n".encode('utf-8'))
 
 
 possibleAnswers = ['y\n', 'yes\n', 'Y\n',
