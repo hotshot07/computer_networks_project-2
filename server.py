@@ -49,6 +49,8 @@ import signal
 
 url = "https://www2.hse.ie/conditions/coronavirus/coronavirus.html"
 #brower = webbrowser.get('chrome')
+#print (wb._browsers)
+#wb.get()
 
 
 def sigint_handler(signum, frame):
@@ -211,7 +213,7 @@ def askForDoctor(client_socket):
             print(ans)
 
             if ans in possibleAnswers:
-                print("Possible")
+                #print("Possible")
                 if ans not in ['y\n', 'yes\n', 'Y\n',
                           'Yes\n']: 
                     client_socket.send( 
