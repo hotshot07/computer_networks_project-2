@@ -88,7 +88,7 @@ def greetUser(client_socket, username):
     client_socket.send(
         f"We have collected your location data anonymously\n".encode('utf-8'))
     client_socket.send(
-        f"Press any key to begin the survey".encode('utf-8'))
+        f"Press Y to begin the survey".encode('utf-8'))
 
 
 possibleAnswers = ['y\n', 'yes\n', 'Y\n',
@@ -212,7 +212,8 @@ def sendToClient(message_to_send, client_socket):
 
 
 def doctorThread(client_socket):
-    client_socket.send("Welcome to the server Doctor. Thank you for your service".encode('utf-8'))
+    client_socket.send(
+        "Welcome to the server Doctor. Thank you for your service".encode('utf-8'))
     while True:
         try:
             message = client_socket.recv(2048)
@@ -302,22 +303,3 @@ while True:
     process.start()
 
     threads.append(process)
-
-# Function to remove user from the chatroom
-# def removeUser(client_socket):
-#     if client_socket in clientList:
-#         print(clientList)
-#         clientList.remove(client_socket)
-#         del clients[client_socket]
-
-
-# # Function to send messages to all the clients connected to the chat server
-# def sendToAll(message, client_socket):
-#     for client in clientList:
-#         # Don't send it to from where we receive the message
-#         if client != client_socket:
-#             try:
-#                 client.send(message)
-#             except:
-#                 print(f"{clients[client]} has left the application")
-#                 removeUser(client)
