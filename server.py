@@ -7,6 +7,11 @@ from threading import Thread
 # For handling the CTRL-C input
 import sys
 
+import time
+
+#allows us to open website
+import webbrowser as wb
+
 # Setting up server_socket to set up TCP/IP and IPv4 protocol and
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -32,11 +37,18 @@ clients = {}
 # List of client_sockets
 clientList = []
 
+# It stores the client and doctor sockets, which are in the chatroom
+# This is the MOST IMPORTANT thing that helps maintain a session
+clientToDoctor = []
+
 # List to keep track of the threads
 threads = []
 
 # Handling Ctrl+C in a very cool way
 import signal
+
+url = "https://www2.hse.ie/conditions/coronavirus/coronavirus.html"
+#brower = webbrowser.get('chrome')
 
 
 def sigint_handler(signum, frame):
@@ -73,6 +85,22 @@ def getNewUser(client_socket):
         return False
 
 
+#---------------------client == patient functions ---------------------
+
+def greetUser(client_socket, username):
+    # Greeting our beloved client
+    client_socket.send(
+        f"Welcome to this helpline {username}!\n".encode('utf-8'))
+    client_socket.send(
+        f"We have collected your location data anonymously\n".encode('utf-8'))
+    client_socket.send(
+        f"Press any key to begin the survey".encode('utf-8'))
+
+
+possibleAnswers = ['y\n', 'yes\n', 'Y\n',
+                   'Yes\n', 'n\n', 'no\n', 'N\n', 'No\n']
+
+
 def sendSurvey(client_socket, question):
 
     surveyList = [
@@ -104,6 +132,7 @@ def checkForVirus(answerlist):
     virusSum = 0
     affirmitiveAnswers = ['y\n', 'yes\n', 'Y\n',
                           'Yes\n']
+
     for i in range(len(answerlist)):
         if answerlist[i] in affirmitiveAnswers:
             virusSum = virusSum + weights[i]
@@ -115,56 +144,93 @@ def checkForVirus(answerlist):
         return "negative"
 
 
-def greetUser(client_socket, username):
-    # Greeting our beloved client
-    client_socket.send(
-        f"Welcome to this helpline {username}!\n".encode('utf-8'))
-    client_socket.send(
-        f"We have collected your location data anonymously\n".encode('utf-8'))
-    client_socket.send(
-        f"Press Y to begin the survey\n".encode('utf-8'))
-
-
-possibleAnswers = ['y\n', 'yes\n', 'Y\n',
-                   'Yes\n', 'n\n', 'no\n', 'N\n', 'No\n']
-
-# A thread that is made when a new user connects
-
-
-clientToDoctor = []
-
-
 def sendMessageToDoctor(client_socket, messageDoctor):
-    message = messageDoctor.encode('utf-8')
+    message = (str(clients[client_socket]) +
+               " > " + messageDoctor).encode('utf-8')
+
     for client in clientToDoctor:
         if client != client_socket:
             try:
                 client.send(message)
             except:
-                print(f"{clients[client]} has left the application")
+                print(f"{clients[client_socket]} has left the application")
 
 
 def connectToDoctor(client_socket):
-    client_socket.send("You are now connected to a doctor".encode('utf-8'))
-    for k, v in clients.items():
-        if v == "Doctor":
-            clientToDoctor.append(k)
+
+    # check for doctor here
+    doctorFound = False
+
+    while not doctorFound:
+        for socket in clientToDoctor:
+            if clients[socket] == "Doctor":
+                doctorFound = True
+
+        if doctorFound == False:
+            client_socket.send("Waiting for a doctor... \n".encode('utf-8'))
+            time.sleep(5)
+
+    # check for more than 2 users in clientToDoctor list
+    session = False
+    while not session:
+        if len(clientToDoctor) < 2:
+            session = True
+        else:
+            client_socket.send(
+                "Doctor is busy... trying again in 5 seconds\n".encode('utf-8'))
+            time.sleep(5)
+
+    client_socket.send("You are now connected to a doctor\n".encode('utf-8'))
+    client_socket.send("Type 'close' to end this session".encode('utf-8'))
 
     clientToDoctor.append(client_socket)
+
     while True:
         try:
             messageDoctor = client_socket.recv(2048)
             messageDoctor = messageDoctor.decode('utf-8')
             if messageDoctor:
-                if messageDoctor == 'close':
-                    return
-                    break
+                if messageDoctor == 'close\n':
+                    print(f"{clients[client_socket]} has left the server")
+                    # removing from lists
+                    clientToDoctor.remove(client_socket)
+                    clientList.remove(client_socket)
+                    del clients[client_socket]
+                    client_socket.close()
                 else:
-
                     sendMessageToDoctor(client_socket, messageDoctor)
         except:
             continue
 
+def askForDoctor(client_socket):
+    while True:
+        try:
+            
+            ans = client_socket.recv(2048)
+            ans = ans.decode('utf-8')
+            print(ans)
+
+            if ans in possibleAnswers:
+                print("Possible")
+                if ans not in ['y\n', 'yes\n', 'Y\n',
+                          'Yes\n']: 
+                    client_socket.send( 
+                    "We are redirecting you to the HSE website for more information as to how to arrange your test".encode('utf-8'))
+                    wb.open(url, new = 2)
+                    client_socket.close()
+                    connectToDoctor(client_socket)
+                    client_socket.close()
+                else:
+                    connectToDoctor(client_socket)
+                    client_socket.close()
+        except:
+            continue
+
+
+# --------------------End of client functions ------------------------------
+
+
+#---------------------Start of doctor functions -----------------------------
 
 def sendToClient(message_to_send, client_socket):
     for client in clientToDoctor:
@@ -177,6 +243,7 @@ def sendToClient(message_to_send, client_socket):
 
 
 def doctorThread(client_socket):
+    client_socket.send("Welcome to the server Doctor. Thank you for your service".encode('utf-8'))
     while True:
         try:
             message = client_socket.recv(2048)
@@ -186,6 +253,8 @@ def doctorThread(client_socket):
                 sendToClient(message_to_send, client_socket)
         except:
             continue
+
+#------------------End of doctor functions ------------------------------------
 
 
 def clientThread(client_socket, client_address):
@@ -198,7 +267,9 @@ def clientThread(client_socket, client_address):
 
     print(f"{username} has connected to the server")
 
+    #-----------code separates here for doctor and patient -------------------
     if username == "Doctor":
+        clientToDoctor.append(client_socket)
         doctorThread(client_socket)
 
     greetUser(client_socket, username)
@@ -216,6 +287,7 @@ def clientThread(client_socket, client_address):
                 answerlist.append(message)
                 # print(answerlist)
                 if question > 16:
+                    # we have finished our survey
                     client_socket.send("End of Survey\n".encode('utf-8'))
                     client_socket.send(
                         "We are now checking if you need to be tested\n".encode('utf-8'))
@@ -224,16 +296,19 @@ def clientThread(client_socket, client_address):
 
                     if confirmation == "positive":
                         client_socket.send(
-                            "You will need a test\n".encode('utf-8'))
-                        connectToDoctor(client_socket)
-                        client_socket.close()
+                            "You will need a test\n Would you like to speak to a doctor".encode('utf-8'))
+                        askForDoctor(client_socket)
+
 
                     elif confirmation == "negative":
-                        client_socket.send("You're fine\n".encode('utf-8'))
+                        client_socket.send(
+                            "You don't need a test\n".encode('utf-8'))
+                        print(f"{username} has left the server")
                         client_socket.close()
 
                 sendSurvey(client_socket, question)
                 question = question + 1
+
         except:
             continue
 
@@ -256,9 +331,10 @@ while True:
     process.daemon = True
 
     process.start()
+
     threads.append(process)
 
-    # Function to remove user from the chatroom
+# Function to remove user from the chatroom
 # def removeUser(client_socket):
 #     if client_socket in clientList:
 #         print(clientList)
