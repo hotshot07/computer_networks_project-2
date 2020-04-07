@@ -9,6 +9,9 @@ import sys
 
 import time
 
+#allows us to open website
+import webbrowser as wb
+
 # Setting up server_socket to set up TCP/IP and IPv4 protocol and
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -43,6 +46,11 @@ threads = []
 
 # Handling Ctrl+C in a very cool way
 import signal
+
+url = "https://www2.hse.ie/conditions/coronavirus/coronavirus.html"
+#brower = webbrowser.get('chrome')
+#print (wb._browsers)
+#wb.get()
 
 
 def sigint_handler(signum, frame):
@@ -196,6 +204,31 @@ def connectToDoctor(client_socket):
         except:
             continue
 
+def askForDoctor(client_socket):
+    while True:
+        try:
+            
+            ans = client_socket.recv(2048)
+            ans = ans.decode('utf-8')
+            print(ans)
+
+            if ans in possibleAnswers:
+                #print("Possible")
+                if ans not in ['y\n', 'yes\n', 'Y\n',
+                          'Yes\n']: 
+                    client_socket.send( 
+                    "We are redirecting you to the HSE website for more information as to how to arrange your test".encode('utf-8'))
+                    wb.open(url, new = 2)
+                    client_socket.close()
+                    connectToDoctor(client_socket)
+                    client_socket.close()
+                else:
+                    connectToDoctor(client_socket)
+                    client_socket.close()
+        except:
+            continue
+
+
 # --------------------End of client functions ------------------------------
 
 
@@ -266,9 +299,9 @@ def clientThread(client_socket, client_address):
 
                     if confirmation == "positive":
                         client_socket.send(
-                            "You will need a test\n".encode('utf-8'))
-                        connectToDoctor(client_socket)
-                        client_socket.close()
+                            "You will need a test\n Would you like to speak to a doctor".encode('utf-8'))
+                        askForDoctor(client_socket)
+
 
                     elif confirmation == "negative":
                         client_socket.send(
