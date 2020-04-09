@@ -94,7 +94,7 @@ def greetUser(client_socket, username):
     client_socket.send(
         f"Welcome to this helpline {username}!\n".encode('utf-8'))
     client_socket.send(
-        f"We have collected your location data anonymously\n".encode('utf-8'))
+        f"We have collected your location data\n".encode('utf-8'))
     client_socket.send(
         f"Press Y to begin the survey".encode('utf-8'))
 
@@ -249,7 +249,13 @@ def doctorThread(client_socket):
         try:
             message = client_socket.recv(2048)
             message = message.decode('utf-8')
-            if message:
+            if message == "doctor exiting":
+                print("Doctor has left the server")
+                clientToDoctor.remove(client_socket)
+                clientList.remove(client_socket)
+                del clients[client_socket]
+                client_socket.close()
+            else:
                 message_to_send = ("Doctor" + " > " + message).encode('utf-8')
                 sendToClient(message_to_send, client_socket)
         except:

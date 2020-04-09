@@ -27,6 +27,8 @@ import signal
 
 def sigint_handler(signum, frame):
     print('\n Disconnecting from server')
+    #tell server
+    client_socket.send(("doctor exiting").encode('utf-8'))
     sys.exit()
 
 
