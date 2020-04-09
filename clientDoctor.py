@@ -35,7 +35,6 @@ def sigint_handler(signum, frame):
 signal.signal(signal.SIGINT, sigint_handler)
 
 # Getting the input of username
-# PLease choose a username that reflects your personality unlike hotshot07
 my_username = "Doctor"
 
 # Clever function to send username to the server

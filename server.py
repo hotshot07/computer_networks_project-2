@@ -7,10 +7,14 @@ from threading import Thread
 # For handling the CTRL-C input
 import sys
 
+# Used for adding the waiting functionality
 import time
 
-# allows us to open website
+# Allows us to open website
 import webbrowser as wb
+
+# Handling Ctrl+C in a very cool way
+import signal
 
 # Setting up server_socket to set up TCP/IP and IPv4 protocol and
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -44,13 +48,10 @@ clientToDoctor = []
 # List to keep track of the threads
 threads = []
 
-# Handling Ctrl+C in a very cool way
-import signal
-
+# The HSE website that user is connected to when he declines to chat with doctor
 url = "https://www2.hse.ie/conditions/coronavirus/coronavirus.html"
-#brower = webbrowser.get('chrome')
-#print (wb._browsers)
-# wb.get()
+
+# Function to handle Ctrl-C
 
 
 def sigint_handler(signum, frame):
@@ -62,7 +63,7 @@ def sigint_handler(signum, frame):
 signal.signal(signal.SIGINT, sigint_handler)
 
 # Function to get username of the new user that connects to the server
-#----- FORMAT -----
+# ----- FORMAT -----
 # 4.........Name
 
 
@@ -87,7 +88,7 @@ def getNewUser(client_socket):
         return False
 
 
-#---------------------client == patient functions ---------------------
+# ---------------------client == patient functions ---------------------
 
 def greetUser(client_socket, username):
     # Greeting our beloved client
@@ -99,9 +100,15 @@ def greetUser(client_socket, username):
         f"Press Y to begin the survey".encode('utf-8'))
 
 
+# List of answers that a user can respond to while giving the survey
+
 possibleAnswers = ['y\n', 'yes\n', 'Y\n',
                    'Yes\n', 'n\n', 'no\n', 'N\n', 'No\n']
 
+
+# Function used to send survey to the clinet
+# Has a client_socket and question index value passed to it
+# It send the client_socket that particular question
 
 def sendSurvey(client_socket, question):
 
@@ -127,9 +134,17 @@ def sendSurvey(client_socket, question):
     client_socket.send(surveyList[question].encode('utf-8'))
 
 
+# All questions respsonded by the client are stored in answerlist
+# which is passed to this function
+# Each question has a different weight from which the final score is calculated
+# If that score is above a certain threshold, user gets a
 def checkForVirus(answerlist):
     weights = [0.88, 0.38, 0.33, 0.18, 0.33, 0.38, 0.14,
                0.14, 0.14, 0.11, 0.05, 0.05, 0.04, -1, 0.3, 0.5, 0.3]
+
+    # First response rejected as it's the asnwer to if you want to start
+    # the survey
+
     answerlist = answerlist[1:]
     virusSum = 0
     affirmitiveAnswers = ['y\n', 'yes\n', 'Y\n',
@@ -138,7 +153,6 @@ def checkForVirus(answerlist):
     for i in range(len(answerlist)):
         if answerlist[i] in affirmitiveAnswers:
             virusSum = virusSum + weights[i]
-            # print(virusSum)
 
     if virusSum >= 1.58:
         return "positive"
@@ -147,6 +161,9 @@ def checkForVirus(answerlist):
 
 
 def sendMessageToDoctor(client_socket, messageDoctor):
+    # message consists of username of the client, so doctor
+    # knows who is sending the message
+
     message = (str(clients[client_socket]) +
                " > " + messageDoctor).encode('utf-8')
 
@@ -166,7 +183,6 @@ def askForDoctor(client_socket):
             ans = ans.decode('utf-8')
 
             if ans in possibleAnswers:
-                # print("Possible")
                 if ans not in ['y\n', 'yes\n', 'Y\n',
                                'Yes\n']:
                     client_socket.send(
@@ -230,7 +246,7 @@ def connectToDoctor(client_socket):
 # --------------------End of client functions ------------------------------
 
 
-#---------------------Start of doctor functions -----------------------------
+# ---------------------Start of doctor functions -----------------------------
 
 def sendToClient(message_to_send, client_socket):
     for client in clientToDoctor:
