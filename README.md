@@ -1,18 +1,8 @@
 # Project2
 
-## Heatmap
-Heatmap of what our service would look like if like 2500 people use it:
-
 We've used python3 for this project\
-To run the script, install these dependencies\
-pip3 install numpy \
-pip3 install pandas \
-pip3 install matplotlib
-
-To run it \
-python3 heatmap.py
-
-![heatmap](heatmap/heatmapimg.png)
+To run the scripts, install these dependencies using requirements.txt\
+pip3 install -r requirements.txt
 
 ## Client-server
 
@@ -23,10 +13,17 @@ Functionality:\
     If server stops running, clients stop as well.
     
 To run files:\
-python3 server.py (1 window on the terminal)\
+python3 server.py\
+python3 clientDoctor.py\
 python3 client.py (open as many terminal windows as clients you desire)\
 Important to start server process before any client.
 
+![demo](images/demo.png)
 
+## Heatmap
 
+Heatmap of what our service would look like if like 2500 people use it:\
+To generate it go into the heaatmap direcrory and run:\
+python3 heatmap.py\
+![heatmap](images/heatmapimg.png)
 
