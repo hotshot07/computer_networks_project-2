@@ -18,10 +18,11 @@ python3 clientDoctor.py\
 python3 client.py (open as many terminal windows as clients you desire)\
 Important to start server process before any client.
 
-(client.py file should be ran for testing the code as shown above)
-(gui.py file was made to run the GUI version of client.py however is unused for testing due to errors)
-
 ![demo](images/demo.png)
+
+(client.py file should be ran for testing the code as shown above - gui.py file was made to run the GUI version of client.py however is unused for testing due to errors)
+
+
 
 ## Heatmap
 
