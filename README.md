@@ -23,7 +23,7 @@ Important to start server process before any client.
 ## Heatmap
 
 Heatmap of what our service would look like if like 2500 people use it:\
-To generate it go into the heaatmap direcrory and run:\
+To generate it go into the heatmap direcrory and run:\
 python3 heatmap.py\
 ![heatmap](images/heatmapimg.png)
 
