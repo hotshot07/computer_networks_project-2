@@ -31,7 +31,7 @@ python3 heatmap.py\
 
 We have tried to implement a small GUI to improve the UX with the program\
 gui.py file was made to run the GUI version of client.py\
-It would still need work to fix some errors (therefore, client.py file should be ran for testing the code as shown above)\
+It would still need work to fix some errors (therefore, client.py file should be ran for testing the code as shown above)
 
 ![Gui_1](images/gui_1.PNG)
 ![Gui_2](images/gui_2.PNG)
