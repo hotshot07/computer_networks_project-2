@@ -22,7 +22,8 @@ Important to start server process before any client.
 
 (client.py file should be ran for testing the code as shown above - gui.py file was made to run the GUI version of client.py however is unused for testing due to errors)
 
-
+![GUI 1](images/GUI 1.png)
+![gui 2](images/gui 2.png)
 
 ## Heatmap
 
